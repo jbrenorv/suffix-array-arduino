@@ -11,42 +11,49 @@
   #include "IterativeQuickSort.h"
   #include "Pair.h"
 
-  void buildSuffixArray(int *p, pair<char, int> *A, int n) {
-    int c[n];
+  void buildSuffixArray(uint8_t *suffixArray, char *inputText, const uint8_t inputTextLength) {
+    uint8_t c[inputTextLength];
     
     {
       // k = 0
-      quickSortIterative(A, 0, n-1);
+      char charToReadInput;
+      pair<char, uint8_t> a[inputTextLength];
+      for (uint8_t i = 0; i < inputTextLength; i++) {
+        charToReadInput = pgm_read_byte_near(inputText + i);
+        a[i] = {charToReadInput, i};
+      }
+      
+      quickSortIterative(a, 0, inputTextLength-1);
 
-      for (int i = 0; i < n; i++)
-        p[i] = A[i].second;
-      c[p[0]] = 0;
-      for (int i = 1; i < n; i++)
+      for (uint8_t i = 0; i < inputTextLength; i++)
+        suffixArray[i] = a[i].second;
+      c[suffixArray[0]] = 0;
+      for (uint8_t i = 1; i < inputTextLength; i++)
       {
-        if (A[i].first == A[i - 1].first)
-          c[p[i]] = c[p[i - 1]];
+        if (a[i].first == a[i - 1].first)
+          c[suffixArray[i]] = c[suffixArray[i - 1]];
         else
-          c[p[i]] = c[p[i - 1]] + 1;
+          c[suffixArray[i]] = c[suffixArray[i - 1]] + 1;
       }
     }
 
-    int k = 0;
-    while ((1 << k) < n)
+    uint8_t k = 0;
+    while ((1 << k) < inputTextLength)
     {
       // k -> k+1
-      pair<pair<int, int>, int> a[n];
-      for (int i = 0; i < n; i++)
-        a[i] = {{c[i], c[(i + (1 << k)) % n]}, i};
-      quickSortIterative(a, 0, n-1);
-      for (int i = 0; i < n; i++)
-        p[i] = a[i].second;
-      c[p[0]] = 0;
-      for (int i = 1; i < n; i++)
+      pair<pair<uint8_t, uint8_t>, uint8_t> a[inputTextLength];
+      for (uint8_t i = 0; i < inputTextLength; i++)
+          a[i] = {{c[i], c[(i + (1 << k)) % inputTextLength]}, i};
+      quickSortIterative(a, 0, inputTextLength-1);
+      for (uint8_t i = 0; i < inputTextLength; i++)
+        suffixArray[i] = a[i].second;
+      c[suffixArray[0]] = 0;
+      for (uint8_t i = 1; i < inputTextLength; i++)
       {
         if (a[i].first == a[i - 1].first)
-          c[p[i]] = c[p[i - 1]];
+          c[suffixArray[i]] = c[suffixArray[i - 1]];
         else
-          c[p[i]] = c[p[i - 1]] + 1;
+          c[suffixArray[i]] = c[suffixArray[i - 1]] + 1;
       }
       k++;
     }

@@ -1,5 +1,5 @@
 /*
-* [T2] Microcontrolador - Desenvolvimento de SW embarcado (PARTE 2)
+* [T3] Microcontrolador - Desenvolvimento de SW embarcado (PARTE 2)
 * Sistemas embarcados 2022.2 - Engenharia da Computacao IFCE
 * Equipe Joao Breno Rodrigues Venancio e Maria Eduarda Caetano da Silva
 *
@@ -10,48 +10,51 @@
 
 #include <avr/pgmspace.h>
 #include "BasicSuffixArray.h"
+#define MAXN 255
 
-// Stored on progmen
-const char inputText[] PROGMEM = {"ababba$"};
+/// Stored in flash memory using progmen
+const char inputText[] PROGMEM = {
+  "ababbaababbaababbaba"
+  "bbaababbaababbababba"
+  "ababbaababbababbaaba"
+  "bbaababbababbaababba"
+  "ababbababbaababbaaba"
+  "bbababbaababbaababba"
+  "babbaababbaababbabab"
+  "baababbaababbababbaa"
+  "babbaababbababbaabab"
+  "baababbababbaababbaa"
+  "babbababbaababbaabab"
+  "bababbaababbaababbab"
+  "abbaababbaabab$"
+};
 
-unsigned int inputTextLength;
-char charToReadInput;
+uint8_t suffixArray[MAXN];
+uint8_t inputTextLength;
 
 void setup() {
   Serial.begin(9600);
 
   while (Serial.available()) ;
 
-  // Read Flash Memory
   inputTextLength = strlen_P(inputText);
-  pair<char, int> a[inputTextLength];
-  for (byte i = 0; i < inputTextLength; i++) {
-    charToReadInput = pgm_read_byte_near(inputText + i);
-    Serial.print(charToReadInput);
-    a[i] = {charToReadInput, i};
-  }
-  Serial.println();
 
-  // para guardar o suffix array resultante
-  int p[inputTextLength];
+  /** Encontra o suffix array. ao final na execucao,
+    * o array suffixArray guardara os sufixos em ordem */
+  buildSuffixArray(suffixArray, inputText, inputTextLength);
 
-  // encontra o suffix array. ao final na execucao, o array p guardara os sufixos em ordem
-  buildSuffixArray(p, a, inputTextLength);
-
-  // imprime o suffix array no monitor serial
-  printArray(p, inputTextLength);
+  /** Imprime o suffix array no monitor serial */
+  printSuffixArray();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+void loop() { }
 
-}
-
-void printArray(int* array, int n) {
-  Serial.print(array[0]);
-  for (int i = 1; i < n; ++i) {
+void printSuffixArray() {
+  Serial.println(F("Suffix array:"));
+  Serial.print(suffixArray[0]);
+  for (uint8_t i = 1; i < inputTextLength; i++) {
     Serial.print(' ');
-    Serial.print(array[i]);
+    Serial.print(suffixArray[i]);
   }
   Serial.println();
 }
